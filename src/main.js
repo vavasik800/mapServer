@@ -1,5 +1,6 @@
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import 'leaflet'
 
 import { createApp } from 'vue'
 import App from './App.vue'
