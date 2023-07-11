@@ -1,47 +1,61 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
+<template>
+  <body class="d-flex flex-column min-vh-100">
+  <header>
+    <nav class="navbar bg-body-tertiary">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img src="../public/favicon.ico" alt="Logo" width="30" height="24"
+               class="d-inline-block align-text-top">
+          MapServer
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <content></content>
+  <footer class="mt-auto pb-1 ps-1">
+    <div class="container-fluid d-flex justify-content-between">
+      <p>
+        RUSLAN_GOLD @ 2023
+      </p>
+      <p>
+        Разработано с любовью
+       <font-awesome-icon icon="fa-regular fa-heart" size="lg" style="color: #ff1100"/>
+      </p>
+    </div>
+  </footer>
+  </body>
+
+</template>
+
+
+<script>
 
 </script>
 
-<template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-    </div>
-  </header>
-
-  <main>
-    <TheWelcome />
-  </main>
-</template>
-
-<style scoped>
-header {
-  line-height: 1.5;
+<style>
+* {
+  margin: 0;
+  padding: 0;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
+html,
+body {
+  height: 100%;
 }
 
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
+.content {
+  flex: 1 0 auto;
+}
 
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
+.footer {
+  flex: 0 0 auto;
 }
 </style>
+
