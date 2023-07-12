@@ -6,19 +6,47 @@
         <a class="navbar-brand ms-2" href="#">
           <img src="../public/favicon.ico" alt="Logo" width="30" height="24"
                class="d-inline-block align-text-top">
-          MapServer
+          PointXY
+        </a>
+        <a class="navbar-brand row" data-bs-toggle="offcanvas" href="#offcanvasExample" role="button"
+           aria-controls="offcanvasExample">
+          <p class="col p-0 text-center fs-6 m-0">Настройки</p>
+          <font-awesome-icon icon="fa-solid fa-gear" class="col p-1"/>
         </a>
       </div>
     </nav>
   </header>
 
   <content>
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">Настройки</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div>
+          Some text as placeholder. In real life you can have the elements you have chosen. Like, text, images, lists,
+          etc.
+        </div>
+        <div class="dropdown mt-3">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+            Dropdown button
+          </button>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="#">Action</a></li>
+            <li><a class="dropdown-item" href="#">Another action</a></li>
+            <li><a class="dropdown-item" href="#">Something else here</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <div class="card m-3">
       <div class="card-body">
-        <div class="row" style="height: 80vh">
+        <div class="row" style="height: 85vh">
           <div class="col-1 ">
             <h5>Список дней</h5>
-            <div class="overflow-auto" style="height: 75vh">
+            <div class="overflow-auto" style="height: 80vh">
               <div>
                 <div class="tab-content">
                   <button type="button" class="btn btn-outline-secondary mb-1 text-lg-left">10-07-2023</button>
@@ -256,11 +284,11 @@
               </div>
             </div>
           </div>
-          <div class="col-1 pl-1">
+          <div class="col-2 pl-1">
             <h5>Маршрут</h5>
           </div>
           <div class="col">
-             <div id="map"></div>
+            <div id="map"></div>
           </div>
         </div>
       </div>
@@ -290,7 +318,7 @@ import 'leaflet/dist/leaflet.css' //Импортируем CSS, без него 
 
 export default {
   name: 'App',
-  data () {
+  data() {
     return {
       centerCoordinates: [51.505, -0.09],
       map: null,
@@ -304,9 +332,9 @@ export default {
     initMap() {
       this.map = L.map('map').setView([51.505, -0.09], 13);
       this.tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-})
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      })
       this.tileLayer.addTo(this.map);
     },
   },
@@ -337,6 +365,7 @@ body {
 .footer {
   flex: 0 0 auto;
 }
+
 #map {
   height: 100%;
   width: 100%;
