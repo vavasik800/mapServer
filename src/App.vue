@@ -24,6 +24,60 @@
   </header>
 
   <content>
+    <div class="row m-3">
+      <div class="col p-0">
+        <div class="btn-toolbar mb-1 mt-0" role="toolbar">
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-success n"
+                      title="Сортировка списка дней">1
+<!--              <b-icon-sort-down></b-icon-sort-down>-->
+            </button>
+            <button type="button"  class="btn btn-outline-success ml-0"
+                      title="Откат до изначальных данных">2
+<!--              <feather-icon icon="RefreshCwIcon"-->
+<!--                            size="16"/>-->
+            </button>
+            <button type="button" class="btn btn-outline-success ml-0"
+                      title="Следующие отбитие на выделенном маркере"
+                      >3
+<!--              <feather-icon icon="ArrowDownIcon"-->
+<!--                            size="16"/>-->
+            </button>
+          </div>
+          <div class="btn-group mx-3 btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-info ml-0"
+                    title="Отключить наконечники линий">4
+<!--              <feather-icon v-if="isArrowHeads"-->
+<!--                            icon="ArrowRightIcon"-->
+<!--                            size="16"/>-->
+<!--              <feather-icon v-else-->
+<!--                            icon="MinusIcon"-->
+<!--                            size="16"/>-->
+            </button>
+            <button type="button" class="btn btn-outline-info ml-0"
+                    title="Отключить движение маркеров"
+            >5
+            </button>
+            <button type="button" class="btn btn-outline-info ml-0"
+                    title="Отключить линии"
+            >6
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col p-0 d-flex justify-content-end">
+        <div class="btn-toolbar mb-1 mt-0">
+          <button  type="button" class="btn btn-outline-success btn-sm ml-0">
+            Выгрузить маршрут
+          </button>
+          <button  type="button" class="btn btn-outline-info btn-sm ms-4">
+            Справка
+          </button>
+        </div>
+      </div>
+    </div>
+
+
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
       <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasExampleLabel">Настройки</h5>

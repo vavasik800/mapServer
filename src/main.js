@@ -6,15 +6,11 @@ import { createApp } from 'vue'
 import App from './App.vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faHeart } from '@fortawesome/free-regular-svg-icons'
-import { faGear,
-         faFileImport,
-         faTrashCan} from '@fortawesome/free-solid-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
+import { fas} from '@fortawesome/free-solid-svg-icons'
 /* add icons to the library */
-library.add(faHeart)
-library.add(faGear)
-library.add(faFileImport)
-library.add(faTrashCan)
+library.add(far)
+library.add(fas)
 /* import the fontawesome core */
 
 /* import font awesome icon component */
