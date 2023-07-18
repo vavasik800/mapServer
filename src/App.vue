@@ -25,53 +25,62 @@
 
   <content>
     <div class="row m-3">
-      <div class="col p-0">
-        <div class="btn-toolbar mb-1 mt-0" role="toolbar">
+      <div class="col">
+        <div class="btn-toolbar" role="toolbar">
           <div class="btn-group btn-group-sm" role="group">
             <button type="button" class="btn btn-outline-success n"
-                      title="Сортировка списка дней">1
-<!--              <b-icon-sort-down></b-icon-sort-down>-->
-            </button>
-            <button type="button"  class="btn btn-outline-success ml-0"
-                      title="Откат до изначальных данных">2
-<!--              <feather-icon icon="RefreshCwIcon"-->
-<!--                            size="16"/>-->
+                    title="Сортировка списка дней">
+              <font-awesome-icon icon="fa-solid fa-arrow-down-wide-short"/>
             </button>
             <button type="button" class="btn btn-outline-success ml-0"
-                      title="Следующие отбитие на выделенном маркере"
-                      >3
-<!--              <feather-icon icon="ArrowDownIcon"-->
-<!--                            size="16"/>-->
+                    title="Откат до изначальных данных">
+              <font-awesome-icon icon="fa-solid fa-arrows-rotate"/>
+            </button>
+            <button type="button" class="btn btn-outline-success ml-0"
+                    title="Следующие отбитие на выделенном маркере"
+            >
+              <font-awesome-icon icon="fa-solid fa-arrow-down"/>
             </button>
           </div>
-          <div class="btn-group mx-3 btn-group-sm" role="group">
-            <button type="button" class="btn btn-outline-info ml-0"
-                    title="Отключить наконечники линий">4
-<!--              <feather-icon v-if="isArrowHeads"-->
-<!--                            icon="ArrowRightIcon"-->
-<!--                            size="16"/>-->
-<!--              <feather-icon v-else-->
-<!--                            icon="MinusIcon"-->
-<!--                            size="16"/>-->
+           <div class="btn-group btn-group-sm mx-2 d-inline-block" role="group">
+            <button type="button"
+                    class="btn btn-outline-info ml-0"
+                    :title="isArrowHeads? 'Отключить наконечники линий' : 'Включить наконечники линий'"
+                    @click="isArrowHeads = !isArrowHeads">
+              <font-awesome-icon v-if="isArrowHeads" icon="fa-solid fa-arrow-right"/>
+              <font-awesome-icon v-else icon="fa-solid fa-minus"/>
             </button>
-            <button type="button" class="btn btn-outline-info ml-0"
-                    title="Отключить движение маркеров"
-            >5
+            <button type="button"
+                    class="btn btn-outline-info ml-0"
+                    :title="isDraggable ? 'Отключить движение маркеров' : 'Включить движение маркеров'"
+                    @click="isDraggable = !isDraggable"
+            >
+              <font-awesome-icon icon="fa-solid fa-location-dot" class="mx-1"/>
+              <font-awesome-icon v-if="isDraggable" icon="fa-solid fa-wind"/>
             </button>
-            <button type="button" class="btn btn-outline-info ml-0"
-                    title="Отключить линии"
-            >6
+            <button type="button"
+                    class="btn btn-outline-info d-inline-flex align-items-center h-100 "
+                    :title="isPolyline ? 'Отключить линии' : 'Включить линии'"
+                    @click="isPolyline = !isPolyline"
+                    style="max-width: 40%"
+            >
+              <font-awesome-icon icon="fa-solid fa-arrow-trend-up" class="me-1 align-middle"/>
+              <font-awesome-icon v-if="isPolyline" icon="fa-solid fa-check" class="me-3"/>
+              <font-awesome-icon v-else icon="fa-solid fa-xmark" class="me-3"/>
             </button>
           </div>
         </div>
+
       </div>
       <div class="col p-0 d-flex justify-content-end">
         <div class="btn-toolbar mb-1 mt-0">
-          <button  type="button" class="btn btn-outline-success btn-sm ml-0">
+          <button type="button" class="btn btn-outline-success btn-sm ml-0">
             Выгрузить маршрут
+            <font-awesome-icon icon="fa-solid fa-cloud-arrow-down" />
           </button>
-          <button  type="button" class="btn btn-outline-info btn-sm ms-4">
+          <button type="button" class="btn btn-outline-info btn-sm ms-4">
             Справка
+            <font-awesome-icon icon="fa-regular fa-circle-question" />
           </button>
         </div>
       </div>
@@ -115,7 +124,7 @@
             <div class="col d-flex justify-content-end">
               <button type="button" class="btn btn-outline-danger btn-sm">
                 Удалить данные
-                <font-awesome-icon icon="fa-solid fa-trash-can" />
+                <font-awesome-icon icon="fa-solid fa-trash-can"/>
               </button>
             </div>
           </div>
@@ -407,7 +416,10 @@ export default {
     return {
       centerCoordinates: [51.505, -0.09],
       map: null,
-      tileLayer: null
+      tileLayer: null,
+      isArrowHeads: true,
+      isDraggable: false,
+      isPolyline: true,
     }
   },
   mounted() {
