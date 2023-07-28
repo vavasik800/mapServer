@@ -1,29 +1,20 @@
 <template>
   <body class="d-flex flex-column min-vh-100">
   <header>
-    <nav class="navbar bg-body-tertiary">
-      <div class="container-fluid p-0 ps-4">
-        <a class="navbar-brand ms-2" href="#">
-          <img src="../public/favicon.ico" alt="Logo" width="30" height="24"
-               class="d-inline-block align-text-top">
-          PointXY
-        </a>
-        <div class="navbar-header navbar-right">
-          <ul class="nav-navbar nav">
-            <li class="nav-item">
-              <a class="navbar-brand row" data-bs-toggle="offcanvas" href="#settings" role="button"
-                 aria-controls="settings">
-                <p class="col p-0 text-center fs-6 m-0">Настройки</p>
-                <font-awesome-icon icon="fa-solid fa-gear" class="col p-1"/>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
-  </header>
-
-  <content>
+    <Header name-program="PointXY"
+            path-img="../public/favicon.ico">
+      <template #right-navbar>
+        <ul class="nav-navbar nav">
+          <li class="nav-item">
+            <a class="navbar-brand row" data-bs-toggle="offcanvas" href="#settings" role="button"
+               aria-controls="settings">
+              <p class="col p-0 text-center fs-6 m-0">Настройки</p>
+              <font-awesome-icon icon="fa-solid fa-gear" class="col p-1"/>
+            </a>
+          </li>
+        </ul>
+      </template>
+    </Header>
     <!--    Настройки карты-->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="settings" aria-labelledby="settingsLabel">
       <div class="offcanvas-header">
@@ -48,20 +39,26 @@
           <div class="row">
             <div class="col">
               <p>Загрузка файла с точками</p>
-              <div class="mb-3">
-                <input class="form-control form-control-sm" id="formFileSm" type="file">
-              </div>
+              <FileReader @load="textFromFile = $event"
+                          v-model:is-file="isFile"></FileReader>
             </div>
           </div>
           <div class="row">
             <div class="col">
-              <button type="button" class="btn btn-outline-primary btn-sm">
+              <button type="button"
+                      class="btn btn-outline-primary btn-sm"
+                      :disabled="textFromFile === ''"
+                      @click="readFile">
                 Прочитать файл
                 <font-awesome-icon icon="fa-solid fa-file-import" class="col"/>
               </button>
             </div>
             <div class="col d-flex justify-content-end">
-              <button type="button" class="btn btn-outline-danger btn-sm">
+              <button type="button"
+                      class="btn btn-outline-danger btn-sm"
+                      :disabled="!isFile"
+                      @click="deleteData"
+              >
                 Удалить данные
                 <font-awesome-icon icon="fa-solid fa-trash-can"/>
               </button>
@@ -73,6 +70,9 @@
         </div>
       </div>
     </div>
+  </header>
+
+  <content>
     <!--    Кнопочная панель управления картой-->
     <div class="row m-3">
       <div class="col">
@@ -144,7 +144,7 @@
         </div>
       </div>
     </div>
-
+    <!--    Карточка с маршрутами и картой-->
     <div class="card m-3 text-dark bg-light border-light shadow" style="height: auto">
       <div class="card-body">
         <div class="row" style="height: 85vh">
@@ -391,9 +391,18 @@
           <div class="col-2 collapse collapse-horizontal fade show" id="collapse" style="max-height: 95%">
             <h5 v-if="selectValue === 2">Маршрут</h5>
             <h5 v-else>Точки</h5>
+            <div class="overflow-auto p-1 h-100">
+               <div v-for="(row, index) in dataMap" :key="index" class="m-0">
+                 <card-for-point :point="row"></card-for-point>
+               </div>
+<!--              <card-for-point></card-for-point>-->
+            </div>
           </div>
           <div class="col">
-            <div id="map" class="h-100 w-100"></div>
+            <map-with-func ref='map'
+                           :center-map="center"
+                           v-model:data-for-map="dataMap">
+            </map-with-func>
           </div>
         </div>
       </div>
@@ -417,52 +426,60 @@
 
 
 <script>
-import L from 'leaflet'  //Импортируем библиотеку leaflet
-import 'leaflet/dist/leaflet.css' //Импортируем CSS, без него не заработает
-
+import FileReader from "./components/FileReader.vue";
+import Header from "./components/Header.vue";
+import MapWithFunc from "./components/MapWithFunc.vue";
+import CardForPoint from "./components/CardForPoint.vue";
 
 export default {
   name: 'App',
   data() {
     return {
-      centerCoordinates: [51.505, -0.09],
-      map: null,
-      tileLayer: null,
+      center: {lat: 54.8, lng: 21},
       isArrowHeads: true,
       isDraggable: false,
       isPolyline: true,
-      isExpandMap: false,
+      isFile: false,
       selectValue: 1,
       options: [
-          {value: 1, text: 'Точки', selected: true},
-          {value: 2, text: 'Маршрут', selected: false},
-      ]
+        {value: 1, text: 'Точки', selected: true},
+        {value: 2, text: 'Маршрут', selected: false},
+      ],
+      dataMap: [],
+      textFromFile: '',
+
     }
   },
-  mounted() {
-    this.initMap();
+  components: {
+    FileReader,
+    Header,
+    MapWithFunc,
+    CardForPoint
   },
+
   methods: {
-    initMap() {
-      this.map = L.map('map').setView([51.505, -0.09], 13);
-      this.tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-      })
-      this.tileLayer.addTo(this.map);
+    deleteData() {
+      this.isFile = false
+      this.textFromFile = ''
+      this.dataMap = []
     },
-    expandMap() {
-      this.isExpandMap = !this.isExpandMap;
-    },
-    selectOption(value) {
-      for (var option of this.options) {
-        if (option.value === value){
-          option.selected = true
-          this.selectValue = value
-        }else {
-          option.selected = false
+
+    readFile() {
+      const rows = this.textFromFile.split('\n');
+      let result = []
+      for (const row of rows) {
+        if (row === '') continue;
+        const textPoint = row.replace('\r', '').split('\t')
+        // Подумать об исключении битых файлов
+        const point = {
+          'lat': parseFloat(textPoint[0]),
+          'lon': parseFloat(textPoint[1]),
+          'comment': textPoint[2]
         }
+        result.push(point)
       }
-      console.log(this.selectValue)
+      this.dataMap = result;
+      this.textFromFile = ''
     },
   },
 }
@@ -506,9 +523,5 @@ body {
   -webkit-box-shadow: inset 0px 0px 10px 6px rgba(66, 170, 255, 1);
 }
 
-/*#map {*/
-/*  height: 100%;*/
-/*  width: 100%;*/
-/*}*/
 </style>
 
