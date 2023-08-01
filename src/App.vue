@@ -56,7 +56,7 @@
             <div class="col d-flex justify-content-end">
               <button type="button"
                       class="btn btn-outline-danger btn-sm"
-                      :disabled="!isFile"
+                      :disabled="pointMarkers.length === 0"
                       @click="deleteData"
               >
                 Удалить данные
@@ -392,17 +392,31 @@
             <h5 v-if="selectValue === 2">Маршрут</h5>
             <h5 v-else>Точки</h5>
             <div class="overflow-auto p-1 h-100">
-               <div v-for="(row, index) in dataMap" :key="index" class="m-0">
-                 <card-for-point :point="row"></card-for-point>
-               </div>
-<!--              <card-for-point></card-for-point>-->
+              <div v-for="(point, index) in pointMarkers" :key="index" class="m-0">
+                <card-for-point v-if="activeMarkerId === point.markerId"
+                                :point="point"
+                                :index-point="index"
+                                :custom-class="'text-bg-success'"
+                ></card-for-point>
+                <card-for-point v-else
+                                :point="point"
+                                :index-point="index"
+                ></card-for-point>
+              </div>
+              <!--              <card-for-point></card-for-point>-->
             </div>
           </div>
           <div class="col">
             <map-with-func ref='map'
                            :center-map="center"
-                           v-model:data-for-map="dataMap">
+                           v-model:data-for-map="dataMap"
+                           v-model:points="pointMarkers"
+                           v-model:active-marker-id="activeMarkerId"
+            >
             </map-with-func>
+            <!--            <div v-for="(point, index) in pointMarkers" :key="index">-->
+            <!--              {{point.marker}}-->
+            <!--            </div>-->
           </div>
         </div>
       </div>
@@ -447,6 +461,8 @@ export default {
       ],
       dataMap: [],
       textFromFile: '',
+      pointMarkers: [],
+      activeMarkerId: 0,
 
     }
   },

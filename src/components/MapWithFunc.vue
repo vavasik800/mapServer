@@ -5,6 +5,12 @@
 <script>
 import L from 'leaflet'  //Импортируем библиотеку leaflet
 import 'leaflet/dist/leaflet.css' //Импортируем CSS, без него не заработает
+import 'leaflet-easybutton/src/easy-button.css'
+import 'leaflet-easybutton/src/easy-button.js'
+import 'leaflet-easybutton/src/easy-button.d.ts'
+import 'font-awesome/css/font-awesome.css'
+import LPolylineMeasure from 'leaflet.polylinemeasure'
+import 'leaflet.polylinemeasure/Leaflet.PolylineMeasure.css'
 
 export default {
   name: "MapWithFunc",
@@ -19,7 +25,15 @@ export default {
     dataForMap: {
       type: Array,
       default: []
-    }
+    },
+    points: {
+      type: Array,
+      default: []
+    },
+    activeMarkerId: {
+      type: Number,
+      default: 0
+    },
 
   },
   data() {
@@ -30,43 +44,77 @@ export default {
       markers: [],
     }
   },
-   mounted() {
+  mounted() {
     this.initMap();
   },
   watch: {
     dataForMap(val, oldVal) {
       if (val.length !== 0) {
         this.calculatedListMarkers(val)
-        this.showMarkers(this.markers)
+        this.showMarkersList(this.markers)
+        for (var marker of this.markers) {
+          marker.markerId = marker.marker._leaflet_id
+        }
+      } else {
+        this.deleteMarkers()
       }
-      else {
-       this.deleteMarkers()
-      }
+      this.$emit("update:points", this.markers)
     }
   },
   methods: {
     initMap() {
-      this.map = L.map('map').setView(this.centerMap, 5);
+      this.map = L.map('map').setView(this.centerMap, 4);
       this.tileLayer = L.tileLayer(this.serverMapUrl, {
         maxZoom: 19,
       })
-      this.tileLayer.addTo(this.map);
+      this.tileLayer.addTo(this.map)
+      var toggle = L.easyButton({
+        states: [{
+          icon: 'fa-map-marker',
+          title: 'Добавить маркер',
+          onClick: this.addMarker,
+        }]
+      });
+      toggle.addTo(this.map);
+
+    },
+    clickMarker(event) {
+      this.$emit("update:activeMarkerId", event.target._leaflet_id)
+    },
+    addMarker() {
+      let marker = this.L.marker([this.map.getCenter().lat, this.map.getCenter().lng], {draggable: true}).on('click', this.clickMarker)
+      let objMarker = {
+        'marker': marker,
+        'markerId': null,
+        'source': 'add',
+        'remark': 'sssss'
+      }
+       console.log(objMarker)
+      this.markers.push(objMarker)
+      this.showMarker(this.markers.at(-1).marker)
+      // Добавление айди макркера
+      this.markers.at(-1).markerId = this.markers.at(-1).marker._leaflet_id
+      this.$emit("update:points", this.markers)
     },
     calculatedListMarkers(dateForWork) {
       for (const indexRow in dateForWork) {
-        let marker = this.L.marker([dateForWork[indexRow].lat, dateForWork[indexRow].lon], {draggable: true})
+        let marker = this.L.marker([dateForWork[indexRow].lat, dateForWork[indexRow].lon], {draggable: true}).on('click', this.clickMarker)
         let objMarker = {
           'marker': marker,
-          'markerId': 1000 + indexRow,
-          'source': 'data'
+          'markerId': null,
+          'source': 'data',
+          'remark': dateForWork[indexRow].comment
         }
         this.markers.push(objMarker)
       }
     },
-    showMarkers(markers) {
+    showMarkersList(markers) {
       for (const marker of markers) {
         marker.marker.addTo(this.map)
       }
+    },
+    showMarker(marker) {
+      marker.addTo(this.map)
     },
     deleteMarkers(markerId = null) {
       if (markerId === null) {
