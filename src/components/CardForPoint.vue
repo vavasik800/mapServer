@@ -38,7 +38,6 @@
 </template>
 
 <script>
-import "bootstrap/dist/css/bootstrap.min.css"
 import {Tooltip} from "bootstrap";
 
 export default {

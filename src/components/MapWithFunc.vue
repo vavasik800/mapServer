@@ -34,6 +34,9 @@ export default {
       type: Number,
       default: 0
     },
+    stylesMarker: {
+      type: Object,
+    },
 
   },
   data() {
@@ -59,9 +62,18 @@ export default {
         this.deleteMarkers()
       }
       this.$emit("update:points", this.markers)
+    },
+    markers(val, oldVal) {
+      console.log(111111111)
+      for (var marker of val) {
+        this.changeStyle(marker.marker, marker.style)
+      }
     }
   },
   methods: {
+    changeStyle(marker, style){
+      marker._icon.style.setProperty('filter', this.stylesMarker[style])
+    },
     initMap() {
       this.map = L.map('map').setView(this.centerMap, 4);
       this.tileLayer = L.tileLayer(this.serverMapUrl, {
@@ -79,7 +91,13 @@ export default {
 
     },
     clickMarker(event) {
-      this.$emit("update:activeMarkerId", event.target._leaflet_id)
+      this.$emit("clickOnMarker", event.target._leaflet_id)
+      var markerActive = this.markers.find(x => x.markerId === event.target._leaflet_id)
+      console.log(2222222)
+      console.log(markerActive)
+      markerActive.style = 'active'
+      this.changeStyle(markerActive.marker, markerActive.style)
+      var container = this.$el.querySelector('#scroll')
     },
     addMarker() {
       let marker = this.L.marker([this.map.getCenter().lat, this.map.getCenter().lng], {draggable: true}).on('click', this.clickMarker)
@@ -87,7 +105,8 @@ export default {
         'marker': marker,
         'markerId': null,
         'source': 'add',
-        'remark': 'sssss'
+        'remark': 'sssss',
+        'style': '',
       }
        console.log(objMarker)
       this.markers.push(objMarker)
@@ -103,7 +122,8 @@ export default {
           'marker': marker,
           'markerId': null,
           'source': 'data',
-          'remark': dateForWork[indexRow].comment
+          'remark': dateForWork[indexRow].comment,
+          'style': '',
         }
         this.markers.push(objMarker)
       }

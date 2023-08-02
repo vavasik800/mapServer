@@ -391,7 +391,7 @@
           <div class="col-2 collapse collapse-horizontal fade show" id="collapse" style="max-height: 95%">
             <h5 v-if="selectValue === 2">Маршрут</h5>
             <h5 v-else>Точки</h5>
-            <div class="overflow-auto p-1 h-100">
+            <div class="overflow-auto p-1 h-100" id="scrollPoints">
               <div v-for="(point, index) in pointMarkers" :key="index" class="m-0">
                 <card-for-point v-if="activeMarkerId === point.markerId"
                                 :point="point"
@@ -411,7 +411,8 @@
                            :center-map="center"
                            v-model:data-for-map="dataMap"
                            v-model:points="pointMarkers"
-                           v-model:active-marker-id="activeMarkerId"
+                           :styles-marker="stylesMarkers"
+                           @click-on-marker="clickOnMarker($event)"
             >
             </map-with-func>
             <!--            <div v-for="(point, index) in pointMarkers" :key="index">-->
@@ -463,6 +464,9 @@ export default {
       textFromFile: '',
       pointMarkers: [],
       activeMarkerId: 0,
+      stylesMarkers: {
+        'active': 'hue-rotate(263deg)'
+      }
 
     }
   },
@@ -479,7 +483,14 @@ export default {
       this.textFromFile = ''
       this.dataMap = []
     },
-
+    clickOnMarker (markerId) {
+      this.activeMarkerId = markerId
+      var container = this.$el.querySelector('#scrollPoints')
+      let countRow = this.pointMarkers.length
+      this.indexActiveElem = this.pointMarkers.findIndex(x => x.markerId === this.activeMarkerId)
+      let c = Math.floor(container.scrollHeight / countRow)
+      container.scrollTop = c * (this.indexActiveElem - 1)
+    },
     readFile() {
       const rows = this.textFromFile.split('\n');
       let result = []
@@ -502,6 +513,7 @@ export default {
 </script>
 
 <style>
+
 * {
   margin: 0;
   padding: 0;
