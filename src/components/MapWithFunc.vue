@@ -34,10 +34,6 @@ export default {
       type: Number,
       default: 0
     },
-    stylesMarker: {
-      type: Object,
-    },
-
   },
   data() {
     return {
@@ -64,16 +60,12 @@ export default {
       this.$emit("update:points", this.markers)
     },
     markers(val, oldVal) {
-      console.log(111111111)
       for (var marker of val) {
         this.changeStyle(marker.marker, marker.style)
       }
     }
   },
   methods: {
-    changeStyle(marker, style){
-      marker._icon.style.setProperty('filter', this.stylesMarker[style])
-    },
     initMap() {
       this.map = L.map('map').setView(this.centerMap, 4);
       this.tileLayer = L.tileLayer(this.serverMapUrl, {
@@ -92,12 +84,7 @@ export default {
     },
     clickMarker(event) {
       this.$emit("clickOnMarker", event.target._leaflet_id)
-      var markerActive = this.markers.find(x => x.markerId === event.target._leaflet_id)
-      console.log(2222222)
-      console.log(markerActive)
-      markerActive.style = 'active'
-      this.changeStyle(markerActive.marker, markerActive.style)
-      var container = this.$el.querySelector('#scroll')
+
     },
     addMarker() {
       let marker = this.L.marker([this.map.getCenter().lat, this.map.getCenter().lng], {draggable: true}).on('click', this.clickMarker)
@@ -108,7 +95,6 @@ export default {
         'remark': 'sssss',
         'style': '',
       }
-       console.log(objMarker)
       this.markers.push(objMarker)
       this.showMarker(this.markers.at(-1).marker)
       // Добавление айди макркера

@@ -397,13 +397,14 @@
                                 :point="point"
                                 :index-point="index"
                                 :custom-class="'text-bg-success'"
+                                @click="clickOnPoint(point.markerId)"
                 ></card-for-point>
                 <card-for-point v-else
                                 :point="point"
                                 :index-point="index"
+                                @click="clickOnPoint(point.markerId)"
                 ></card-for-point>
               </div>
-              <!--              <card-for-point></card-for-point>-->
             </div>
           </div>
           <div class="col">
@@ -415,9 +416,7 @@
                            @click-on-marker="clickOnMarker($event)"
             >
             </map-with-func>
-            <!--            <div v-for="(point, index) in pointMarkers" :key="index">-->
-            <!--              {{point.marker}}-->
-            <!--            </div>-->
+
           </div>
         </div>
       </div>
@@ -465,6 +464,7 @@ export default {
       pointMarkers: [],
       activeMarkerId: 0,
       stylesMarkers: {
+        '': '',
         'active': 'hue-rotate(263deg)'
       }
 
@@ -483,13 +483,29 @@ export default {
       this.textFromFile = ''
       this.dataMap = []
     },
-    clickOnMarker (markerId) {
+    clickOnPoint(markerId) {
+      if (this.activeMarkerId !== 0) {
+        var markerActive = this.pointMarkers.find(x => x.markerId === this.activeMarkerId)
+        markerActive.style = ''
+      }
       this.activeMarkerId = markerId
+      const indexActiveElem = this.pointMarkers.findIndex(x => x.markerId === this.activeMarkerId)
+      this.pointMarkers[indexActiveElem].style = 'active'
+      this.changeStyle(this.pointMarkers)
+      return indexActiveElem
+    },
+    clickOnMarker (markerId) {
+      const indexActiveElem = this.clickOnPoint(markerId)
       var container = this.$el.querySelector('#scrollPoints')
       let countRow = this.pointMarkers.length
-      this.indexActiveElem = this.pointMarkers.findIndex(x => x.markerId === this.activeMarkerId)
       let c = Math.floor(container.scrollHeight / countRow)
-      container.scrollTop = c * (this.indexActiveElem - 1)
+      container.scrollTop = c * (indexActiveElem - 1)
+    },
+    changeStyle(markers) {
+      for (var marker of markers) {
+        const style = marker.style
+        marker.marker._icon.style.setProperty('filter', this.stylesMarkers[style])
+      }
     },
     readFile() {
       const rows = this.textFromFile.split('\n');

@@ -6,9 +6,9 @@
         <div class="row float-end">
           <button type="button"
                   class='btn btn-link p-2 w-auto'
-                  @click="insertInBuffer(point)"
+                  @click.stop="insertInBuffer(point)"
                   :data-bs-toggle="'tooltip'.concat(indexPoint)"
-                 >
+          >
             <font-awesome-icon icon="fa-regular fa-paste"/>
           </button>
         </div>
@@ -26,13 +26,13 @@
           {{ point.remark }}
         </div>
       </div>
-<!--      <div class="card-footer">-->
-<!--        <p>-->
-<!--          <a href="#" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">-->
-<!--          Подробнее-->
-<!--          </a>-->
-<!--        </p>-->
-<!--      </div>-->
+      <!--      <div class="card-footer">-->
+      <!--        <p>-->
+      <!--          <a href="#" class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover">-->
+      <!--          Подробнее-->
+      <!--          </a>-->
+      <!--        </p>-->
+      <!--      </div>-->
     </div>
   </div>
 </template>
@@ -62,27 +62,27 @@ export default {
   mounted() {
     var strForFind = '[data-bs-toggle="tooltip'.concat(this.indexPoint).concat('"]')
     var tooltipTriggerList = Array.prototype.slice.call(document.querySelectorAll(strForFind))
-    console.log(tooltipTriggerList)
     this.tooltip = new Tooltip(tooltipTriggerList[0], {
-        title: 'Скопировано',
-        trigger: 'manual',
-        placement: 'top',
-        customClass: 'custom-tooltip',
+      title: 'Скопировано',
+      trigger: 'manual',
+      placement: 'top',
+      customClass: 'custom-tooltip',
     })
-    console.log(this.tooltip)
-
   },
   methods: {
     insertInBuffer(point) {
       this.tooltip.show()
-      navigator.clipboard.writeText([point.lat, point.lon].join(', '))
+      navigator.clipboard.writeText([point.marker.getLatLng().lat.toFixed(6), point.marker.getLatLng().lng.toFixed(6)].join(', '))
       setTimeout(
           () => {
-           this.tooltip.hide()
+            this.tooltip.hide()
           },
           1 * 1000
-);
+      );
     },
+    // clickInCard() {
+    //   this.$emit("getActiveMarker", this.point.markerId)
+    // },
   }
 }
 </script>
