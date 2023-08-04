@@ -56,7 +56,7 @@
             <div class="col d-flex justify-content-end">
               <button type="button"
                       class="btn btn-outline-danger btn-sm"
-                      :disabled="pointMarkers.length === 0"
+                      :disabled="pointMarkers.length === 0 "
                       @click="deleteData"
               >
                 Удалить данные
@@ -395,14 +395,16 @@
               <div v-for="(point, index) in pointMarkers" :key="index" class="m-0">
                 <card-for-point v-if="activeMarkerId === point.markerId"
                                 :point="point"
-                                :index-point="index"
+                                :index-point="point.markerId"
                                 :custom-class="'text-bg-success'"
                                 @click="clickOnPoint(point.markerId)"
+                                @delete-point="deleteMarker($event)"
                 ></card-for-point>
                 <card-for-point v-else
                                 :point="point"
-                                :index-point="index"
+                                :index-point="point.markerId"
                                 @click="clickOnPoint(point.markerId)"
+                                @delete-point="deleteMarker($event)"
                 ></card-for-point>
               </div>
             </div>
@@ -412,8 +414,10 @@
                            :center-map="center"
                            v-model:data-for-map="dataMap"
                            v-model:points="pointMarkers"
+                           v-model:marker-for-delete="markerForDelete"
                            :styles-marker="stylesMarkers"
                            @click-on-marker="clickOnMarker($event)"
+
             >
             </map-with-func>
 
@@ -460,6 +464,7 @@ export default {
         {value: 2, text: 'Маршрут', selected: false},
       ],
       dataMap: [],
+      markerForDelete: 0,
       textFromFile: '',
       pointMarkers: [],
       activeMarkerId: 0,
@@ -476,7 +481,6 @@ export default {
     MapWithFunc,
     CardForPoint
   },
-
   methods: {
     deleteData() {
       this.isFile = false
@@ -506,6 +510,14 @@ export default {
         const style = marker.style
         marker.marker._icon.style.setProperty('filter', this.stylesMarkers[style])
       }
+    },
+    deleteMarker(markerId) {
+      console.log('Delete')
+      this.markerForDelete = markerId
+      if ( this.activeMarkerId === markerId){
+        this.activeMarkerId = 0
+      }
+      console.log(this.markerForDelete)
     },
     readFile() {
       const rows = this.textFromFile.split('\n');

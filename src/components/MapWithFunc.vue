@@ -26,6 +26,10 @@ export default {
       type: Array,
       default: []
     },
+    markerForDelete: {
+      type: Number,
+      default: 0
+    },
     points: {
       type: Array,
       default: []
@@ -59,11 +63,16 @@ export default {
       }
       this.$emit("update:points", this.markers)
     },
-    markers(val, oldVal) {
-      for (var marker of val) {
-        this.changeStyle(marker.marker, marker.style)
+    markerForDelete(val, oldVal) {
+      console.log('Delete in Map')
+      console.log(this.markers)
+      if (val !== 0) {
+        this.deleteMarkers(val)
       }
-    }
+      console.log(this.markers)
+      this.$emit("update:points", this.markers)
+      this.$emit("update:markersForDelete", 0)
+    },
   },
   methods: {
     initMap() {

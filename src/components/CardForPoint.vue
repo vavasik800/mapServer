@@ -1,9 +1,8 @@
 <template>
   <div>
     <div :class="'card border-success mb-3 '.concat(customClass)" style="max-width: 18rem;">
-      <!--      <div class="card-header">Точка</div>-->
       <div class="card-body pt-0 pb-2">
-        <div class="row float-end">
+        <div class="row float-start">
           <button type="button"
                   class='btn btn-link p-2 w-auto'
                   @click.stop="insertInBuffer(point)"
@@ -11,6 +10,15 @@
           >
             <font-awesome-icon icon="fa-regular fa-paste"/>
           </button>
+        </div>
+        <div class="row float-end">
+          <button type="button"
+                  class='btn btn-link p-2 w-auto'
+                   @click.stop="deletePoint(point)"
+          >
+            <font-awesome-icon icon="fa-solid fa-xmark" style="color: red"/>
+          </button>
+
         </div>
         <div class="row pt-2">
           <div class="col">Широта</div>
@@ -59,9 +67,17 @@ export default {
       tooltip: {},
     }
   },
+  created() {
+    console.log(this.tooltip)
+  },
   mounted() {
+    console.log(1111)
+    console.log(this.indexPoint)
     var strForFind = '[data-bs-toggle="tooltip'.concat(this.indexPoint).concat('"]')
+    console.log(document.querySelectorAll(strForFind))
     var tooltipTriggerList = Array.prototype.slice.call(document.querySelectorAll(strForFind))
+    console.log(tooltipTriggerList)
+    if (tooltipTriggerList.length === 0) return
     this.tooltip = new Tooltip(tooltipTriggerList[0], {
       title: 'Скопировано',
       trigger: 'manual',
@@ -80,9 +96,10 @@ export default {
           1 * 1000
       );
     },
-    // clickInCard() {
-    //   this.$emit("getActiveMarker", this.point.markerId)
-    // },
+    deletePoint() {
+      console.log(this.indexPoint)
+      this.$emit("deletePoint", this.point.markerId)
+    },
   }
 }
 </script>
