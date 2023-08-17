@@ -93,7 +93,7 @@ export default {
       tooltip: {},
       isCreateComment: false,
       newPoint: null,
-      textRemark: '',
+      textRemark: this.point.remark,
     }
   },
   mounted() {

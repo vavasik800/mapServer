@@ -9,6 +9,9 @@ import 'leaflet-easybutton/src/easy-button.css'
 import 'leaflet-easybutton/src/easy-button.js'
 import 'leaflet-easybutton/src/easy-button.d.ts'
 import 'font-awesome/css/font-awesome.css'
+import 'leaflet.markercluster/dist/leaflet.markercluster.js'
+import 'leaflet.markercluster/dist/MarkerCluster.css'
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import LPolylineMeasure from 'leaflet.polylinemeasure'
 import 'leaflet.polylinemeasure/Leaflet.PolylineMeasure.css'
 
@@ -38,6 +41,10 @@ export default {
       type: Number,
       default: 0
     },
+    isClustering: {
+      type: Boolean,
+      default: false
+    },
   },
   data() {
     return {
@@ -45,6 +52,7 @@ export default {
       map: null,
       tileLayer: null,
       markers: [],
+      clust: null,
     }
   },
   mounted() {
@@ -59,19 +67,42 @@ export default {
           marker.markerId = marker.marker._leaflet_id
         }
       } else {
-        this.deleteMarkers()
+        if (this.isClustering) {
+          this.deleteClustMarkers()
+        }
+        else{
+          this.deleteMarkers()
+        }
       }
       this.$emit("update:points", this.markers)
     },
     markerForDelete(val, oldVal) {
-      console.log('Delete in Map')
-      console.log(this.markers)
       if (val !== 0) {
-        this.deleteMarkers(val)
+        if (this.isClustering) {
+          this.deleteClustMarkers(val)
+        }
+        else{
+          this.deleteMarkers(val)
+        }
       }
-      console.log(this.markers)
       this.$emit("update:points", this.markers)
       this.$emit("update:markersForDelete", 0)
+    },
+    isClustering (val, oldVal) {
+      if (val) {
+        this.clust = this.L.markerClusterGroup()
+        for (const marker of this.markers) {
+          this.clust.addLayer(marker.marker)
+        }
+        this.deleteMarkers(null, true)
+        this.map.addLayer(this.clust)
+      }else {
+        this.map.removeLayer(this.clust)
+        this.showMarkersList(this.markers)
+      }
+    },
+    centerMap (val, oldVal) {
+       this.map.panTo(val)
     },
   },
   methods: {
@@ -89,7 +120,6 @@ export default {
         }]
       });
       toggle.addTo(this.map);
-
     },
     clickMarker(event) {
       this.$emit("clickOnMarker", event.target._leaflet_id)
@@ -124,23 +154,57 @@ export default {
       }
     },
     showMarkersList(markers) {
-      for (const marker of markers) {
-        marker.marker.addTo(this.map)
+      if (this.isClustering) {
+        for (const marker of markers) {
+          this.clust.addLayer(marker.marker)
+        }
+      } else {
+        for (const marker of markers) {
+          marker.marker.addTo(this.map)
+        }
       }
     },
     showMarker(marker) {
+      if (this.isClustering) {
+        this.clust.addLayer(marker)
+        return
+      }
       marker.addTo(this.map)
     },
-    deleteMarkers(markerId = null) {
+    deleteMarkers(markerId = null, deleteLayer = false) {
       if (markerId === null) {
         for (const marker of this.markers) {
-          this.map.removeLayer(marker.marker)
+            this.map.removeLayer(marker.marker)
+        }
+        if (deleteLayer) {
+          return;
         }
         this.markers = []
         return
       }
       const indexMarker = this.markers.findIndex(x => x.markerId === markerId)
       this.map.removeLayer(this.markers[indexMarker].marker)
+      if (deleteLayer) {
+          return;
+        }
+      this.markers.splice(indexMarker, 1)
+    },
+    deleteClustMarkers(markerId = null, deleteLayer = false) {
+      if (markerId === null) {
+        for (const marker of this.markers) {
+            this.clust.removeLayer(marker.marker)
+        }
+        if (deleteLayer) {
+          return;
+        }
+        this.markers = []
+        return
+      }
+      const indexMarker = this.markers.findIndex(x => x.markerId === markerId)
+      this.clust.removeLayer(this.markers[indexMarker].marker)
+      if (deleteLayer) {
+          return;
+        }
       this.markers.splice(indexMarker, 1)
     },
   }

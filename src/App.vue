@@ -65,8 +65,21 @@
             </div>
           </div>
           <hr/>
-
-
+          <div class="row">
+            <div class="col">
+              <span class="align-baseline">Кластеризация точек</span>
+            </div>
+            <div class="col">
+              <div class="form-check form-switch d-flex">
+                <input class="form-check-input ms-auto"
+                       type="checkbox"
+                       role="switch"
+                       id="flexSwitchCheckDefault"
+                       v-model="isClustering"
+                >
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -408,6 +421,7 @@
                            v-model:data-for-map="dataMap"
                            v-model:points="pointMarkers"
                            v-model:marker-for-delete="markerForDelete"
+                           v-model:isClustering="isClustering"
                            :styles-marker="stylesMarkers"
                            @click-on-marker="clickOnMarker($event)"
 
@@ -468,6 +482,7 @@ export default {
         '': '',
         'active': 'text-bg-success'
       },
+      isClustering: false,
 
     }
   },
@@ -491,6 +506,7 @@ export default {
       this.activeMarkerId = markerId
       const indexActiveElem = this.pointMarkers.findIndex(x => x.markerId === this.activeMarkerId)
       this.pointMarkers[indexActiveElem].style = 'active'
+      this.center = this.pointMarkers[indexActiveElem].marker.getLatLng()
       this.changeStyle(this.pointMarkers)
       return indexActiveElem
     },
@@ -504,7 +520,9 @@ export default {
     changeStyle(markers) {
       for (var marker of markers) {
         const style = marker.style
-        marker.marker._icon.style.setProperty('filter', this.stylesMarkers[style])
+        if (marker.marker._icon) {
+          marker.marker._icon.style.setProperty('filter', this.stylesMarkers[style])
+        }
       }
     },
     deleteMarker(markerId) {
