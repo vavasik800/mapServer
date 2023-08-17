@@ -101,7 +101,7 @@ export default {
         'marker': marker,
         'markerId': null,
         'source': 'add',
-        'remark': 'sssss',
+        'remark': '',
         'style': '',
       }
       this.markers.push(objMarker)

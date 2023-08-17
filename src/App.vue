@@ -393,16 +393,9 @@
             <h5 v-else>Точки</h5>
             <div class="overflow-auto p-1 h-100" id="scrollPoints">
               <div v-for="(point, index) in pointMarkers" :key="index" class="m-0">
-                <card-for-point v-if="activeMarkerId === point.markerId"
-                                :point="point"
+                <card-for-point :point="point"
                                 :index-point="point.markerId"
-                                :custom-class="'text-bg-success'"
-                                @click="clickOnPoint(point.markerId)"
-                                @delete-point="deleteMarker($event)"
-                ></card-for-point>
-                <card-for-point v-else
-                                :point="point"
-                                :index-point="point.markerId"
+                                :custom-class="stylesPointMarkers[point.style]"
                                 @click="clickOnPoint(point.markerId)"
                                 @delete-point="deleteMarker($event)"
                 ></card-for-point>
@@ -420,7 +413,6 @@
 
             >
             </map-with-func>
-
           </div>
         </div>
       </div>
@@ -471,7 +463,11 @@ export default {
       stylesMarkers: {
         '': '',
         'active': 'hue-rotate(263deg)'
-      }
+      },
+      stylesPointMarkers: {
+        '': '',
+        'active': 'text-bg-success'
+      },
 
     }
   },
