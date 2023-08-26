@@ -512,6 +512,11 @@ export default {
     },
     clickOnMarker (markerId) {
       const indexActiveElem = this.clickOnPoint(markerId)
+      this.pointMarkers[indexActiveElem].marker.unbindPopup()
+      let remark = this.pointMarkers[indexActiveElem].remark
+      if (remark !== "") {
+      this.pointMarkers[indexActiveElem].marker.bindPopup(remark).openPopup()
+      }
       var container = this.$el.querySelector('#scrollPoints')
       let countRow = this.pointMarkers.length
       let c = Math.floor(container.scrollHeight / countRow)
