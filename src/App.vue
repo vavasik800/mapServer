@@ -146,7 +146,10 @@
       </div>
       <div class="col p-0 d-flex justify-content-end">
         <div class="btn-toolbar mb-1 mt-0">
-          <button type="button" class="btn btn-outline-success btn-sm ml-0">
+          <button type="button"
+                  @click="writeFile"
+                  class="btn btn-outline-success btn-sm ml-0">
+
             Выгрузить маршрут
             <font-awesome-icon icon="fa-solid fa-cloud-arrow-down"/>
           </button>
@@ -510,12 +513,12 @@ export default {
       this.changeStyle(this.pointMarkers)
       return indexActiveElem
     },
-    clickOnMarker (markerId) {
+    clickOnMarker(markerId) {
       const indexActiveElem = this.clickOnPoint(markerId)
       this.pointMarkers[indexActiveElem].marker.unbindPopup()
       let remark = this.pointMarkers[indexActiveElem].remark
       if (remark !== "") {
-      this.pointMarkers[indexActiveElem].marker.bindPopup(remark).openPopup()
+        this.pointMarkers[indexActiveElem].marker.bindPopup(remark).openPopup()
       }
       var container = this.$el.querySelector('#scrollPoints')
       let countRow = this.pointMarkers.length
@@ -533,29 +536,51 @@ export default {
     deleteMarker(markerId) {
       console.log('Delete')
       this.markerForDelete = markerId
-      if ( this.activeMarkerId === markerId){
+      if (this.activeMarkerId === markerId) {
         this.activeMarkerId = 0
       }
       console.log(this.markerForDelete)
     },
-    readFile() {
-      const rows = this.textFromFile.split('\n');
-      let result = []
-      for (const row of rows) {
-        if (row === '') continue;
-        const textPoint = row.replace('\r', '').split('\t')
-        // Подумать об исключении битых файлов
-        const point = {
-          'lat': parseFloat(textPoint[0]),
-          'lon': parseFloat(textPoint[1]),
-          'comment': textPoint[2]
-        }
-        result.push(point)
+    writeFile() {
+      let textForFile = ''
+      for (const point of this.pointMarkers){
+        textForFile += point.marker.getLatLng().lat.toFixed(6)
+        textForFile += '\t'
+        textForFile += point.marker.getLatLng().lng.toFixed(6)
+        textForFile += '\t'
+        textForFile += point.remark
+        textForFile += '\n'
       }
-      this.dataMap = result;
-      this.textFromFile = ''
-    },
+      console.log(textForFile)
+      const blob = new Blob([textForFile], {type: 'text/plain'});
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'points.txt');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
   },
+  readFile() {
+    const rows = this.textFromFile.split('\n');
+    let result = []
+    for (const row of rows) {
+      if (row === '') continue;
+      const textPoint = row.replace('\r', '').split('\t')
+      // Подумать об исключении битых файлов
+      const point = {
+        'lat': parseFloat(textPoint[0]),
+        'lon': parseFloat(textPoint[1]),
+        'comment': textPoint[2]
+      }
+      result.push(point)
+    }
+    this.dataMap = result;
+    this.textFromFile = ''
+  },
+}
+,
 }
 </script>
 

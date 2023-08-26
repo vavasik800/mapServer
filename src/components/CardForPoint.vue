@@ -125,7 +125,7 @@ export default {
     },
     saveComment() {
       this.newPoint = this.point
-      this.newPoint.remark = this.textRemark
+      this.newPoint.remark = this.textRemark.trim()
       this.$emit('update:point', this.newPoint)
       this.isCreateComment = false
     },
