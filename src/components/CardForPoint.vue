@@ -45,6 +45,7 @@
                  @input.stop
                  @click.stop
                  type="text"
+                 v-on:keyup.enter="saveComment"
                  class="form-control form-control-sm">
           <button v-if="isCreateComment"
                   class="btn btn-link p-2 w-auto"
@@ -124,7 +125,7 @@ export default {
     },
     saveComment() {
       this.newPoint = this.point
-      this.newPoint.remark = this.textRemark
+      this.newPoint.remark = this.textRemark.trim()
       this.$emit('update:point', this.newPoint)
       this.isCreateComment = false
     },
