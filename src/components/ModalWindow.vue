@@ -17,8 +17,8 @@
           <button type="button"
                   class="btn btn-outline-primary btn-sm"
                   @click="clickSaveButton"
-          >Сохранить изменения</button>
-          <button type="button" class="btn btn-outline-danger btn-sm" data-bs-dismiss="modal">Отмена</button>
+          >{{ titleOkButton }}</button>
+          <button type="button" class="btn btn-outline-danger btn-sm" data-bs-dismiss="modal">{{ titleCancelButton }}</button>
         </div>
       </div>
     </div>
@@ -43,6 +43,14 @@ export default {
     },
     imgBody: {
       type: String,
+    },
+    titleOkButton: {
+      type: String,
+      default: 'Ок'
+    },
+    titleCancelButton: {
+      type: String,
+      default: 'Отмена'
     }
   },
   mounted() {

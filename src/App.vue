@@ -92,15 +92,18 @@
         <div class="btn-toolbar" role="toolbar">
           <div class="btn-group btn-group-sm" role="group">
             <button type="button" class="btn btn-outline-success n"
+                    disabled
                     title="Сортировка списка дней">
               <font-awesome-icon icon="fa-solid fa-arrow-down-wide-short"/>
             </button>
             <button type="button" class="btn btn-outline-success ml-0"
+                    disabled
                     title="Откат до изначальных данных">
               <font-awesome-icon icon="fa-solid fa-arrows-rotate"/>
             </button>
             <button type="button" class="btn btn-outline-success ml-0"
                     title="Следующие отбитие на выделенном маркере"
+                    disabled
             >
               <font-awesome-icon icon="fa-solid fa-arrow-down"/>
             </button>
@@ -119,6 +122,7 @@
             <button type="button"
                     class="btn btn-outline-info ml-0"
                     :title="isArrowHeads? 'Отключить наконечники линий' : 'Включить наконечники линий'"
+                    disabled
                     @click="isArrowHeads = !isArrowHeads">
               <font-awesome-icon v-if="isArrowHeads" icon="fa-solid fa-arrow-right"/>
               <font-awesome-icon v-else icon="fa-solid fa-minus"/>
@@ -126,7 +130,8 @@
             <button type="button"
                     class="btn btn-outline-info ml-0"
                     :title="isDraggable ? 'Отключить движение маркеров' : 'Включить движение маркеров'"
-                    @click="isDraggable = !isDraggable"
+                    @click="draggableMarker"
+                    :disabled="pointMarkers.length === 0"
             >
               <font-awesome-icon icon="fa-solid fa-location-dot" class="mx-1"/>
               <font-awesome-icon v-if="isDraggable" icon="fa-solid fa-wind"/>
@@ -135,6 +140,7 @@
                     class="btn btn-outline-info d-inline-flex align-items-center h-100 "
                     :title="isPolyline ? 'Отключить линии' : 'Включить линии'"
                     @click="isPolyline = !isPolyline"
+                    disabled
                     style="max-width: 40%"
             >
               <font-awesome-icon icon="fa-solid fa-arrow-trend-up" class="me-1 align-middle"/>
@@ -158,8 +164,11 @@
                         header="Выгрузка точек"
                         text-body="Вы действительно хотите выгрузить все точки в файл?"
                         img-body="city-maps.png"
+                        title-ok-button="Выгрузить"
                         @click-ok="writeFile"/>
-          <button type="button" class="btn btn-outline-info btn-sm ms-4">
+          <button type="button"
+                  disabled
+                  class="btn btn-outline-info btn-sm ms-4">
             Справка
             <font-awesome-icon icon="fa-regular fa-circle-question"/>
           </button>
@@ -431,11 +440,9 @@
                            v-model:points="pointMarkers"
                            v-model:marker-for-delete="markerForDelete"
                            v-model:isClustering="isClustering"
+                           :is-dragging="isDraggable"
                            :styles-marker="stylesMarkers"
-                           @click-on-marker="clickOnMarker($event)"
-
-            >
-            </map-with-func>
+                           @click-on-marker="clickOnMarker($event)"/>
           </div>
         </div>
       </div>
@@ -471,7 +478,7 @@ export default {
     return {
       center: {lat: 54.8, lng: 21},
       isArrowHeads: true,
-      isDraggable: false,
+      isDraggable: true,
       isPolyline: true,
       isFile: false,
       selectValue: 1,
@@ -542,12 +549,21 @@ export default {
       }
     },
     deleteMarker(markerId) {
-      console.log('Delete')
       this.markerForDelete = markerId
       if (this.activeMarkerId === markerId) {
         this.activeMarkerId = 0
       }
-      console.log(this.markerForDelete)
+    },
+    draggableMarker() {
+      this.isDraggable = !this.isDraggable
+      for (let point of this.pointMarkers) {
+        if (this.isDraggable) {
+          point.marker.dragging.enable()
+        }
+        else {
+          point.marker.dragging.disable()
+        }
+      }
     },
     writeFile() {
       let textForFile = ''
@@ -559,10 +575,8 @@ export default {
         textForFile += point.remark
         textForFile += '\n'
       }
-      console.log(textForFile)
       const blob = new Blob([textForFile], {type: 'text/plain'});
       const url = URL.createObjectURL(blob);
-
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', 'points.txt');

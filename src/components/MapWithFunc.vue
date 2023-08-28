@@ -45,6 +45,10 @@ export default {
       type: Boolean,
       default: false
     },
+    isDragging: {
+      type: Boolean,
+      default: true
+    },
   },
   data() {
     return {
@@ -126,7 +130,7 @@ export default {
 
     },
     addMarker() {
-      let marker = this.L.marker([this.map.getCenter().lat, this.map.getCenter().lng], {draggable: true}).on('click', this.clickMarker)
+      let marker = this.L.marker([this.map.getCenter().lat, this.map.getCenter().lng], {draggable: this.isDragging}).on('click', this.clickMarker)
       let objMarker = {
         'marker': marker,
         'markerId': null,
