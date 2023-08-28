@@ -147,12 +147,18 @@
       <div class="col p-0 d-flex justify-content-end">
         <div class="btn-toolbar mb-1 mt-0">
           <button type="button"
-                  @click="writeFile"
-                  class="btn btn-outline-success btn-sm ml-0">
-
+                  class="btn btn-outline-success btn-sm ml-0"
+                  data-bs-toggle="modal"
+                  :disabled="pointMarkers.length === 0"
+                  data-bs-target="#downloadPoint">
             Выгрузить маршрут
             <font-awesome-icon icon="fa-solid fa-cloud-arrow-down"/>
           </button>
+          <modal-window id="downloadPoint"
+                        header="Выгрузка точек"
+                        text-body="Вы действительно хотите выгрузить все точки в файл?"
+                        img-body="city-maps.png"
+                        @click-ok="writeFile"/>
           <button type="button" class="btn btn-outline-info btn-sm ms-4">
             Справка
             <font-awesome-icon icon="fa-regular fa-circle-question"/>
@@ -457,6 +463,7 @@ import FileReader from "./components/FileReader.vue";
 import Header from "./components/Header.vue";
 import MapWithFunc from "./components/MapWithFunc.vue";
 import CardForPoint from "./components/CardForPoint.vue";
+import ModalWindow from "./components/ModalWindow.vue";
 
 export default {
   name: 'App',
@@ -490,10 +497,11 @@ export default {
     }
   },
   components: {
+    ModalWindow,
     FileReader,
     Header,
     MapWithFunc,
-    CardForPoint
+    CardForPoint,
   },
   methods: {
     deleteData() {

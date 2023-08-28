@@ -35,7 +35,7 @@
                   @click.stop="createComment"
                   title="Изменить комментарий к точке"
           >
-            <font-awesome-icon icon="fa-regular fa-comment" />
+            <font-awesome-icon icon="fa-regular fa-comment"/>
           </button>
           <p class="m-0" v-if="!isCreateComment">
             {{ point.remark }}
@@ -54,13 +54,13 @@
                   @click.stop="saveComment"
                   title="Сохранить комментарий"
           >
-            <font-awesome-icon icon="fa-regular fa-square-plus" />
+            <font-awesome-icon icon="fa-regular fa-square-plus"/>
           </button>
         </div>
-<!--        <div class="row px-4">-->
-<!--          -->
+        <!--        <div class="row px-4">-->
+        <!--          -->
 
-<!--        </div>-->
+        <!--        </div>-->
       </div>
       <!--      <div class="card-footer">-->
       <!--        <p>-->
@@ -124,7 +124,7 @@ export default {
       this.isCreateComment = true
       this.$nextTick(() => {
         this.$refs.inputComment.focus()
-    })
+      })
     },
     deletePoint() {
       this.isCreateComment = false
