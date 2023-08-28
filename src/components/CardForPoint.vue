@@ -32,7 +32,7 @@
         <div class="input-group mb-0 align-items-center h-100">
           <button type="button"
                   class='btn btn-link p-2 w-auto'
-                  @click.stop="isCreateComment = true"
+                  @click.stop="createComment"
                   title="Изменить комментарий к точке"
           >
             <font-awesome-icon icon="fa-regular fa-comment" />
@@ -42,6 +42,7 @@
           </p>
           <input v-if="isCreateComment"
                  v-model="textRemark"
+                 ref="inputComment"
                  @input.stop
                  @click.stop
                  type="text"
@@ -119,8 +120,14 @@ export default {
           1 * 1000
       );
     },
+    createComment() {
+      this.isCreateComment = true
+      this.$nextTick(() => {
+        this.$refs.inputComment.focus()
+    })
+    },
     deletePoint() {
-      console.log(this.indexPoint)
+      this.isCreateComment = false
       this.$emit("deletePoint", this.point.markerId)
     },
     saveComment() {
