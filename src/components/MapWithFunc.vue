@@ -155,9 +155,11 @@ export default {
     },
     showMarkersList(markers) {
       if (this.isClustering) {
+        let mark = []
         for (const marker of markers) {
-          this.clust.addLayer(marker.marker)
+          mark.push(marker.marker)
         }
+        this.clust.addLayers(mark)
       } else {
         for (const marker of markers) {
           marker.marker.addTo(this.map)

@@ -51,6 +51,8 @@
                       @click="readFile">
                 Прочитать файл
                 <font-awesome-icon icon="fa-solid fa-file-import" class="col"/>
+                <spinner v-if="isReadFile" color="primary"
+                         size="sm" class="ms-1"/>
               </button>
             </div>
             <div class="col d-flex justify-content-end">
@@ -92,15 +94,18 @@
         <div class="btn-toolbar" role="toolbar">
           <div class="btn-group btn-group-sm" role="group">
             <button type="button" class="btn btn-outline-success n"
+                    disabled
                     title="Сортировка списка дней">
               <font-awesome-icon icon="fa-solid fa-arrow-down-wide-short"/>
             </button>
             <button type="button" class="btn btn-outline-success ml-0"
+                    disabled
                     title="Откат до изначальных данных">
               <font-awesome-icon icon="fa-solid fa-arrows-rotate"/>
             </button>
             <button type="button" class="btn btn-outline-success ml-0"
                     title="Следующие отбитие на выделенном маркере"
+                    disabled
             >
               <font-awesome-icon icon="fa-solid fa-arrow-down"/>
             </button>
@@ -111,6 +116,7 @@
                     data-bs-target="#collapse"
                     aria-expanded="false"
                     aria-controls="collapse"
+                    @click="isCollapse = !isCollapse"
             >
               <font-awesome-icon icon="fa-solid fa-map-location-dot"/>
             </button>
@@ -119,6 +125,7 @@
             <button type="button"
                     class="btn btn-outline-info ml-0"
                     :title="isArrowHeads? 'Отключить наконечники линий' : 'Включить наконечники линий'"
+                    disabled
                     @click="isArrowHeads = !isArrowHeads">
               <font-awesome-icon v-if="isArrowHeads" icon="fa-solid fa-arrow-right"/>
               <font-awesome-icon v-else icon="fa-solid fa-minus"/>
@@ -126,7 +133,8 @@
             <button type="button"
                     class="btn btn-outline-info ml-0"
                     :title="isDraggable ? 'Отключить движение маркеров' : 'Включить движение маркеров'"
-                    @click="isDraggable = !isDraggable"
+                    @click="draggableMarker"
+                    :disabled="pointMarkers.length === 0"
             >
               <font-awesome-icon icon="fa-solid fa-location-dot" class="mx-1"/>
               <font-awesome-icon v-if="isDraggable" icon="fa-solid fa-wind"/>
@@ -135,6 +143,7 @@
                     class="btn btn-outline-info d-inline-flex align-items-center h-100 "
                     :title="isPolyline ? 'Отключить линии' : 'Включить линии'"
                     @click="isPolyline = !isPolyline"
+                    disabled
                     style="max-width: 40%"
             >
               <font-awesome-icon icon="fa-solid fa-arrow-trend-up" class="me-1 align-middle"/>
@@ -147,13 +156,22 @@
       <div class="col p-0 d-flex justify-content-end">
         <div class="btn-toolbar mb-1 mt-0">
           <button type="button"
-                  @click="writeFile"
-                  class="btn btn-outline-success btn-sm ml-0">
-
+                  class="btn btn-outline-success btn-sm ml-0"
+                  data-bs-toggle="modal"
+                  :disabled="pointMarkers.length === 0"
+                  data-bs-target="#downloadPoint">
             Выгрузить маршрут
             <font-awesome-icon icon="fa-solid fa-cloud-arrow-down"/>
           </button>
-          <button type="button" class="btn btn-outline-info btn-sm ms-4">
+          <modal-window id="downloadPoint"
+                        header="Выгрузка точек"
+                        text-body="Вы действительно хотите выгрузить все точки в файл?"
+                        img-body="city-maps.png"
+                        title-ok-button="Выгрузить"
+                        @click-ok="writeFile"/>
+          <button type="button"
+                  disabled
+                  class="btn btn-outline-info btn-sm ms-4">
             Справка
             <font-awesome-icon icon="fa-regular fa-circle-question"/>
           </button>
@@ -404,20 +422,22 @@
               </div>
             </div>
           </div>
-          <div class="col-2 collapse collapse-horizontal fade show" id="collapse" style="max-height: 95%">
-            <h5 v-if="selectValue === 2">Маршрут</h5>
-            <h5 v-else>Точки</h5>
-            <div class="overflow-auto p-1 h-100" id="scrollPoints">
-              <div v-for="(point, index) in pointMarkers" :key="index" class="m-0">
-                <card-for-point :point="point"
-                                :index-point="point.markerId"
-                                :custom-class="stylesPointMarkers[point.style]"
-                                @click="clickOnPoint(point.markerId)"
-                                @delete-point="deleteMarker($event)"
-                ></card-for-point>
+          <template v-if="isCollapse">
+            <div class="col-2 collapse collapse-horizontal fade show" id="collapse" style="max-height: 95%">
+              <h5 v-if="selectValue === 2">Маршрут</h5>
+              <h5 v-else>Точки</h5>
+              <div class="overflow-auto p-1 h-100" id="scrollPoints">
+                <div v-for="(point, index) in pointMarkers" :key="index" class="m-0">
+                  <card-for-point :point="point"
+                                  :index-point="point.markerId"
+                                  :custom-class="stylesPointMarkers[point.style]"
+                                  @click="clickOnPoint(point.markerId)"
+                                  @delete-point="deleteMarker($event)"
+                  ></card-for-point>
+                </div>
               </div>
             </div>
-          </div>
+          </template>
           <div class="col">
             <map-with-func ref='map'
                            :center-map="center"
@@ -425,11 +445,9 @@
                            v-model:points="pointMarkers"
                            v-model:marker-for-delete="markerForDelete"
                            v-model:isClustering="isClustering"
+                           :is-dragging="isDraggable"
                            :styles-marker="stylesMarkers"
-                           @click-on-marker="clickOnMarker($event)"
-
-            >
-            </map-with-func>
+                           @click-on-marker="clickOnMarker($event)"/>
           </div>
         </div>
       </div>
@@ -457,6 +475,8 @@ import FileReader from "./components/FileReader.vue";
 import Header from "./components/Header.vue";
 import MapWithFunc from "./components/MapWithFunc.vue";
 import CardForPoint from "./components/CardForPoint.vue";
+import ModalWindow from "./components/ModalWindow.vue";
+import Spinner from "@/components/Spinner.vue";
 
 export default {
   name: 'App',
@@ -464,7 +484,9 @@ export default {
     return {
       center: {lat: 54.8, lng: 21},
       isArrowHeads: true,
-      isDraggable: false,
+      isCollapse: true,
+      isDraggable: true,
+      isReadFile: false,
       isPolyline: true,
       isFile: false,
       selectValue: 1,
@@ -490,16 +512,19 @@ export default {
     }
   },
   components: {
+    Spinner,
+    ModalWindow,
     FileReader,
     Header,
     MapWithFunc,
-    CardForPoint
+    CardForPoint,
   },
   methods: {
     deleteData() {
       this.isFile = false
       this.textFromFile = ''
       this.dataMap = []
+      this.activeMarkerId = 0
     },
     clickOnPoint(markerId) {
       if (this.activeMarkerId !== 0) {
@@ -534,16 +559,24 @@ export default {
       }
     },
     deleteMarker(markerId) {
-      console.log('Delete')
       this.markerForDelete = markerId
       if (this.activeMarkerId === markerId) {
         this.activeMarkerId = 0
       }
-      console.log(this.markerForDelete)
+    },
+    draggableMarker() {
+      this.isDraggable = !this.isDraggable
+      for (let point of this.pointMarkers) {
+        if (this.isDraggable) {
+          point.marker.dragging.enable()
+        } else {
+          point.marker.dragging.disable()
+        }
+      }
     },
     writeFile() {
       let textForFile = ''
-      for (const point of this.pointMarkers){
+      for (const point of this.pointMarkers) {
         textForFile += point.marker.getLatLng().lat.toFixed(6)
         textForFile += '\t'
         textForFile += point.marker.getLatLng().lng.toFixed(6)
@@ -551,36 +584,41 @@ export default {
         textForFile += point.remark
         textForFile += '\n'
       }
-      console.log(textForFile)
       const blob = new Blob([textForFile], {type: 'text/plain'});
       const url = URL.createObjectURL(blob);
-
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', 'points.txt');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-  },
-  readFile() {
-    const rows = this.textFromFile.split('\n');
-    let result = []
-    for (const row of rows) {
-      if (row === '') continue;
-      const textPoint = row.replace('\r', '').split('\t')
-      // Подумать об исключении битых файлов
-      const point = {
-        'lat': parseFloat(textPoint[0]),
-        'lon': parseFloat(textPoint[1]),
-        'comment': textPoint[2]
+    },
+    b() {
+      this.isReadFile = true
+      const s = await this.readFile()
+      
+
+    },
+    async readFile() {
+      const rows = this.textFromFile.split('\n');
+      let result = []
+      for (const row of rows) {
+        if (row === '') continue;
+        const textPoint = row.replace('\r', '').split('\t')
+        // Подумать об исключении битых файлов
+        const point = {
+          'lat': parseFloat(textPoint[0]),
+          'lon': parseFloat(textPoint[1]),
+          'comment': textPoint[2]
+        }
+        result.push(point)
       }
-      result.push(point)
-    }
-    this.dataMap = result;
-    this.textFromFile = ''
-  },
-}
-,
+      this.dataMap = result;
+      this.textFromFile = ''
+      return true
+    },
+  }
+  ,
 }
 </script>
 
