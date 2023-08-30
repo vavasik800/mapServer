@@ -1,15 +1,13 @@
 <template>
   <div id="map" class="h-100 w-100"></div>
   <modal-window  id="loadPoint">
-    <div slot="body">
-      <div
-
-          class="progress mt-2" role="progressbar" aria-label="Example with label" aria-valuenow="10" aria-valuemin="0"
+    <template v-slot:body>
+    <div class="progress mt-2" role="progressbar" aria-label="Example with label" aria-valuenow="10" aria-valuemin="0"
           aria-valuemax="100">
         <div ref="progress" class="progress-bar overflow-visible text-dark" style="width: 0%">Длинный текст
         </div>
       </div>
-    </div>
+  </template>
   </modal-window>
 </template>
 
