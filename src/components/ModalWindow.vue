@@ -6,6 +6,7 @@
           <h5  class="modal-title">{{ header }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
         </div>
+        <slot name="body" />
         <div class="modal-body">
           <img v-if="imgBody"
                :src="imgBody"

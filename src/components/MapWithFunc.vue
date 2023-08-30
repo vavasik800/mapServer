@@ -1,8 +1,20 @@
 <template>
   <div id="map" class="h-100 w-100"></div>
+  <modal-window  id="loadPoint">
+    <div slot="body">
+      <div
+
+          class="progress mt-2" role="progressbar" aria-label="Example with label" aria-valuenow="10" aria-valuemin="0"
+          aria-valuemax="100">
+        <div ref="progress" class="progress-bar overflow-visible text-dark" style="width: 0%">Длинный текст
+        </div>
+      </div>
+    </div>
+  </modal-window>
 </template>
 
 <script>
+import {Modal} from 'bootstrap'
 import L from 'leaflet'  //Импортируем библиотеку leaflet
 import 'leaflet/dist/leaflet.css' //Импортируем CSS, без него не заработает
 import 'leaflet-easybutton/src/easy-button.css'
@@ -14,9 +26,11 @@ import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import LPolylineMeasure from 'leaflet.polylinemeasure'
 import 'leaflet.polylinemeasure/Leaflet.PolylineMeasure.css'
+import ModalWindow from "./ModalWindow.vue";
 
 export default {
   name: "MapWithFunc",
+  components: {ModalWindow},
   props: {
     serverMapUrl: {
       type: String,
@@ -64,6 +78,10 @@ export default {
   },
   watch: {
     dataForMap(val, oldVal) {
+      let a = new Modal('#loadPoint')
+      a.show()
+      console.log(a)
+      console.log('dataForMap 1 ')
       if (val.length !== 0) {
         this.calculatedListMarkers(val)
         this.showMarkersList(this.markers)
@@ -79,6 +97,7 @@ export default {
         }
       }
       this.$emit("update:points", this.markers)
+      console.log('dataForMap 2 ')
     },
     markerForDelete(val, oldVal) {
       if (val !== 0) {
@@ -94,7 +113,25 @@ export default {
     },
     isClustering (val, oldVal) {
       if (val) {
-        this.clust = this.L.markerClusterGroup()
+        var progressBar = this.$refs.progress;
+        console.log(this.$root)
+
+        function updateProgressBar(processed, total, elapsed, layersArray) {
+          console.log(progressBar)
+          if (elapsed > 1000) {
+            // if it takes more than a second to load, display the progress bar:
+            progressBar.style.width = Math.round(processed / total * 100) + '%';
+          }
+
+          // if (processed === total) {
+          //   // all markers processed - hide the progress bar:
+          //   // progress.style.display = 'none';
+          // }
+        }
+        this.clust = this.L.markerClusterGroup({
+          chunkedLoading: true,
+          chunkProgress: updateProgressBar
+      })
         for (const marker of this.markers) {
           this.clust.addLayer(marker.marker)
         }
@@ -126,8 +163,8 @@ export default {
       toggle.addTo(this.map);
     },
     clickMarker(event) {
+      console.log('_leaflet_id', event.target._leaflet_id)
       this.$emit("clickOnMarker", event.target._leaflet_id)
-
     },
     addMarker() {
       let marker = this.L.marker([this.map.getCenter().lat, this.map.getCenter().lng], {draggable: this.isDragging}).on('click', this.clickMarker)
@@ -145,6 +182,7 @@ export default {
       this.$emit("update:points", this.markers)
     },
     calculatedListMarkers(dateForWork) {
+      console.log('calculatedListMarkers 1 ')
       for (const indexRow in dateForWork) {
         let marker = this.L.marker([dateForWork[indexRow].lat, dateForWork[indexRow].lon], {draggable: true}).on('click', this.clickMarker)
         let objMarker = {
@@ -156,17 +194,21 @@ export default {
         }
         this.markers.push(objMarker)
       }
+      console.log('calculatedListMarkers 2 ')
     },
     showMarkersList(markers) {
+      console.log('showMarkersList 1 ')
       if (this.isClustering) {
-        for (const marker of markers) {
-          this.clust.addLayer(marker.marker)
-        }
+        let mark = markers.map(marker => {
+          return marker.marker
+        })
+        this.clust.addLayers(mark)
       } else {
         for (const marker of markers) {
           marker.marker.addTo(this.map)
         }
       }
+      console.log('showMarkersList 2')
     },
     showMarker(marker) {
       if (this.isClustering) {
@@ -195,9 +237,7 @@ export default {
     },
     deleteClustMarkers(markerId = null, deleteLayer = false) {
       if (markerId === null) {
-        for (const marker of this.markers) {
-            this.clust.removeLayer(marker.marker)
-        }
+        this.clust.clearLayers()
         if (deleteLayer) {
           return;
         }
