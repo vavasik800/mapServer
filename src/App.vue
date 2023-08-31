@@ -46,14 +46,14 @@
           <div class="row">
             <div class="col">
               <button type="button"
+                      ref="readFileBut"
                       class="btn btn-outline-primary btn-sm"
                       :disabled="textFromFile === ''"
                       @click="readFile">
                 Прочитать файл
                 <font-awesome-icon icon="fa-solid fa-file-import" class="col"/>
-                <spinner v-if="isReadFile" color="primary"
-                         size="sm" class="ms-1"/>
               </button>
+
             </div>
             <div class="col d-flex justify-content-end">
               <button type="button"
@@ -66,7 +66,11 @@
               </button>
             </div>
           </div>
-
+          <alert-message v-if="isAlertDownload"
+                         class="mt-3 fs-7"
+                         color="danger"
+                         :content="textFromAllert"
+                         @close="isAlertDownload = false"/>
           <hr/>
           <div class="row">
             <div class="col">
@@ -472,12 +476,14 @@
 
 
 <script>
+import {Popover} from 'bootstrap'
+
 import FileReader from "./components/FileReader.vue";
 import Header from "./components/Header.vue";
 import MapWithFunc from "./components/MapWithFunc.vue";
 import CardForPoint from "./components/CardForPoint.vue";
 import ModalWindow from "./components/ModalWindow.vue";
-import Spinner from "@/components/Spinner.vue";
+import AlertMessage from "./components/alertMessage.vue";
 
 export default {
   name: 'App',
@@ -490,6 +496,7 @@ export default {
       isReadFile: false,
       isPolyline: true,
       isFile: false,
+      isAlertDownload: false,
       selectValue: 1,
       options: [
         {value: 1, text: 'Точки', selected: true},
@@ -509,11 +516,11 @@ export default {
         'active': 'text-bg-success'
       },
       isClustering: false,
-
+      textFromAllert: '',
     }
   },
   components: {
-    Spinner,
+    AlertMessage,
     ModalWindow,
     FileReader,
     Header,
@@ -543,15 +550,12 @@ export default {
       this.activeMarkerId = 0
     },
     clickOnPoint(markerId) {
-      console.log(markerId)
-      console.log(this.activeMarkerId)
       if (this.activeMarkerId !== 0) {
         var markerActive = this.pointMarkers.find(x => x.marker._leaflet_id === this.activeMarkerId)
         markerActive.style = ''
       }
       this.activeMarkerId = markerId
       const indexActiveElem = this.pointMarkers.findIndex(x => x.marker._leaflet_id === this.activeMarkerId)
-      console.log(indexActiveElem, this.pointMarkers[indexActiveElem])
       this.pointMarkers[indexActiveElem].style = 'active'
       this.center = this.pointMarkers[indexActiveElem].marker.getLatLng()
       this.changeStyle(this.pointMarkers)
@@ -617,6 +621,13 @@ export default {
     readFile() {
       const rows = this.textFromFile.split('\n');
       let result = []
+      if (rows.length > 1000 && !this.isClustering) {
+        this.textFromAllert = 'Слишком много точек! Попробуйте включить кластеризацию'
+        this.isAlertDownload = true
+        return
+      } else if (rows.length > 1000 && this.isClustering) {
+        this.isCollapse = false
+      }
       for (const row of rows) {
         if (row === '') continue;
         const textPoint = row.replace('\r', '').split('\t')
@@ -674,6 +685,10 @@ body {
 ::-webkit-scrollbar-thumb {
   border-radius: 10px;
   -webkit-box-shadow: inset 0px 0px 10px 6px rgba(66, 170, 255, 1);
+}
+
+.fs-7 {
+  font-size: 0.8rem;
 }
 
 </style>
