@@ -1,13 +1,14 @@
 <template>
   <div id="map" class="h-100 w-100"></div>
-  <modal-window  id="loadPoint">
+  <modal-window id="loadPoint" :footer="false">
     <template v-slot:body>
-    <div class="progress mt-2" role="progressbar" aria-label="Example with label" aria-valuenow="10" aria-valuemin="0"
-          aria-valuemax="100">
-        <div ref="progress" class="progress-bar overflow-visible text-dark" style="width: 0%">Длинный текст
+      <h5>Подождите идёт загрузка данных...</h5>
+      <div class="progress mt-3" role="progressbar" aria-label="Example with label" aria-valuenow="10" aria-valuemin="0"
+           aria-valuemax="100">
+        <div ref="progress" class="progress-bar overflow-visible text-dark" style="width: 0%">{{ progressText }}
         </div>
       </div>
-  </template>
+    </template>
   </modal-window>
 </template>
 
@@ -25,10 +26,11 @@ import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import LPolylineMeasure from 'leaflet.polylinemeasure'
 import 'leaflet.polylinemeasure/Leaflet.PolylineMeasure.css'
 import ModalWindow from "./ModalWindow.vue";
+import Spinner from "./Spinner.vue";
 
 export default {
   name: "MapWithFunc",
-  components: {ModalWindow},
+  components: {Spinner, ModalWindow},
   props: {
     serverMapUrl: {
       type: String,
@@ -69,17 +71,16 @@ export default {
       tileLayer: null,
       markers: [],
       clust: null,
+      progressText: '',
+      madalProgress: null,
     }
   },
   mounted() {
     this.initMap();
+    this.madalProgress = new Modal('#loadPoint')
   },
   watch: {
     dataForMap(val, oldVal) {
-      let a = new Modal('#loadPoint')
-      a.show()
-      console.log(a)
-      console.log('dataForMap 1 ')
       if (val.length !== 0) {
         this.calculatedListMarkers(val)
         this.showMarkersList(this.markers)
@@ -89,59 +90,55 @@ export default {
       } else {
         if (this.isClustering) {
           this.deleteClustMarkers()
-        }
-        else{
+        } else {
           this.deleteMarkers()
         }
       }
       this.$emit("update:points", this.markers)
-      console.log('dataForMap 2 ')
     },
     markerForDelete(val, oldVal) {
       if (val !== 0) {
         if (this.isClustering) {
           this.deleteClustMarkers(val)
-        }
-        else{
+        } else {
           this.deleteMarkers(val)
         }
       }
       this.$emit("update:points", this.markers)
       this.$emit("update:markersForDelete", 0)
     },
-    isClustering (val, oldVal) {
+
+    isClustering(val, oldVal) {
       if (val) {
         var progressBar = this.$refs.progress;
-        console.log(this.$root)
+        let self = this
 
         function updateProgressBar(processed, total, elapsed, layersArray) {
-          console.log(progressBar)
           if (elapsed > 1000) {
-            // if it takes more than a second to load, display the progress bar:
+            self.madalProgress.show()
+            self.progressText = 'Загружено: '.concat(processed).concat('/').concat(total)
             progressBar.style.width = Math.round(processed / total * 100) + '%';
           }
-
-          // if (processed === total) {
-          //   // all markers processed - hide the progress bar:
-          //   // progress.style.display = 'none';
-          // }
+          if (processed === total) {
+            self.madalProgress.hide()
+          }
         }
         this.clust = this.L.markerClusterGroup({
           chunkedLoading: true,
           chunkProgress: updateProgressBar
-      })
+        })
         for (const marker of this.markers) {
           this.clust.addLayer(marker.marker)
         }
         this.deleteMarkers(null, true)
         this.map.addLayer(this.clust)
-      }else {
+      } else {
         this.map.removeLayer(this.clust)
         this.showMarkersList(this.markers)
       }
     },
-    centerMap (val, oldVal) {
-       this.map.panTo(val)
+    centerMap(val, oldVal) {
+      this.map.panTo(val)
     },
   },
   methods: {
@@ -161,7 +158,6 @@ export default {
       toggle.addTo(this.map);
     },
     clickMarker(event) {
-      console.log('_leaflet_id', event.target._leaflet_id)
       this.$emit("clickOnMarker", event.target._leaflet_id)
     },
     addMarker() {
@@ -180,7 +176,6 @@ export default {
       this.$emit("update:points", this.markers)
     },
     calculatedListMarkers(dateForWork) {
-      console.log('calculatedListMarkers 1 ')
       for (const indexRow in dateForWork) {
         let marker = this.L.marker([dateForWork[indexRow].lat, dateForWork[indexRow].lon], {draggable: true}).on('click', this.clickMarker)
         let objMarker = {
@@ -192,10 +187,8 @@ export default {
         }
         this.markers.push(objMarker)
       }
-      console.log('calculatedListMarkers 2 ')
     },
     showMarkersList(markers) {
-      console.log('showMarkersList 1 ')
       if (this.isClustering) {
         let mark = markers.map(marker => {
           return marker.marker
@@ -206,7 +199,6 @@ export default {
           marker.marker.addTo(this.map)
         }
       }
-      console.log('showMarkersList 2')
     },
     showMarker(marker) {
       if (this.isClustering) {
@@ -218,7 +210,7 @@ export default {
     deleteMarkers(markerId = null, deleteLayer = false) {
       if (markerId === null) {
         for (const marker of this.markers) {
-            this.map.removeLayer(marker.marker)
+          this.map.removeLayer(marker.marker)
         }
         if (deleteLayer) {
           return;
@@ -229,8 +221,8 @@ export default {
       const indexMarker = this.markers.findIndex(x => x.markerId === markerId)
       this.map.removeLayer(this.markers[indexMarker].marker)
       if (deleteLayer) {
-          return;
-        }
+        return;
+      }
       this.markers.splice(indexMarker, 1)
     },
     deleteClustMarkers(markerId = null, deleteLayer = false) {
@@ -245,8 +237,8 @@ export default {
       const indexMarker = this.markers.findIndex(x => x.markerId === markerId)
       this.clust.removeLayer(this.markers[indexMarker].marker)
       if (deleteLayer) {
-          return;
-        }
+        return;
+      }
       this.markers.splice(indexMarker, 1)
     },
   }
